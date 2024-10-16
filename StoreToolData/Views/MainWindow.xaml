@@ -1,0 +1,153 @@
+﻿<Window x:Class="StoreToolData.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StoreToolData"
+        mc:Ignorable="d"
+        Title="Tool Data" Height="706" Width="750" Loaded="Window_Loaded">
+
+    <Grid Margin="15">
+        <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <TabControl.Resources>
+                <!-- TabItem Style -->
+                <Style TargetType="TabItem">
+                    <Setter Property="FontSize" Value="12"/>
+                    <Setter Property="Padding" Value="12 5"/>
+                    <Setter Property="Margin" Value="2 0"/>
+                    <Setter Property="Background" Value="#E5E5E5"/>
+                    <Setter Property="BorderBrush" Value="#CCCCCC"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+
+                    <!-- Mouse over effect -->
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#CCCCCC"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.Resources>
+            <TabItem Header="Tools">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ListView Name="lvTools" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0,10" Grid.RowSpan="2">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Tool Number" Width="120" DisplayMemberBinding="{Binding ToolNumber}" />
+                                <GridViewColumn Header="Pot Number" Width="120" DisplayMemberBinding="{Binding PotNum}" />
+                                <GridViewColumn Header="Tool Life" Width="120" DisplayMemberBinding="{Binding ToolLife}" />
+                                <GridViewColumn Header="Tool Life Remaining" Width="150" DisplayMemberBinding="{Binding ToolLifeRem}" />
+                                <GridViewColumn Header="Length Offset" Width="150" DisplayMemberBinding="{Binding ToolLengthOffset}" />
+                                <GridViewColumn Header="Tool Attached" Width="150" DisplayMemberBinding="{Binding ToolIsAttached}" />
+                                <GridViewColumn Header="Name" Width="250" DisplayMemberBinding="{Binding ToolName}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                    <Button x:Name="btnGetToolData" Content="Update Tools" HorizontalAlignment="Right"
+                            ToolTip="Choose a SQL setting to enable." ToolTipService.ShowOnDisabled="True" 
+                            Margin="0,10,0,10" Width="130" Height="40" VerticalAlignment="Bottom" Grid.Row="1" Click="btnGetToolData_Click"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Settings">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" BorderBrush="DarkGray" BorderThickness="1" CornerRadius="5" Padding="10" Margin="5">
+                            <StackPanel>
+                                <Label Content="SQL Settings:" FontSize="16" Margin="0,0,0,2" FontWeight="Bold" />
+                                <RadioButton Name="rbSqlite" Checked="DatabaseTypeChanged" Content="SQL Lite" Margin="0,2,0,0" />
+                                <RadioButton Name="rbSqlServer" Checked="DatabaseTypeChanged" Content="SQL Server" Margin="0,5,0,2" />
+
+                                <StackPanel Visibility="{Binding ElementName=rbSqlite, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Label Content="SQLite Database File" FontWeight="Bold" FontSize="18" Margin="0,10,0,2"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Name="txtSqliteFilePath" Grid.Column="0" Width="325" Margin="0,2" TextChanged="txtSqliteFilePath_TextChanged"/>
+                                        <Button Name="btnBrowse" Content="Browse" Grid.Column="1" Click="btnDirectoryBrowse_Click" Margin="5,5,0,2"/>
+                                    </Grid>
+                                    <Button Name="btnSqliteSave" Content="Save" Width="130" Height="40" Margin="0,40,0,0" IsEnabled="False" Click="btnSqliteSave_Click" />
+                                </StackPanel>
+
+                                <StackPanel Visibility="{Binding ElementName=rbSqlServer, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Label Content="SQL Server Connection Details" FontWeight="Bold" FontSize="18" Margin="0,2,0,2"/>
+                                    <Label Content="Server Name / IP:" />
+                                    <TextBox Name="txtServerName" Width="250" Margin="0,2"/>
+                                    <Label Content="Instance Name (optional):" />
+                                    <TextBox Name="txtInstanceName" Width="250" Margin="0,2"/>
+                                    <Label Content="Database Name:" />
+                                    <TextBox Name="txtDatabaseName" Width="250" Margin="0,2"/>
+                                    <Label Content="Authentication:" FontWeight="Bold" Margin="0,10,0,5"/>
+                                    <RadioButton Name="rbWindowsAuth" Content="Windows Authentication" IsChecked="True" Margin="0,2"/>
+                                    <RadioButton Name="rbSQLAuth" Content="SQL Server Authentication" Margin="0,5"/>
+                                    <StackPanel Name="sqlAuthPanel" IsEnabled="{Binding ElementName=rbSQLAuth, Path=IsChecked}" Margin="10,2,0,2">
+                                        <Label Content="Username:" />
+                                        <TextBox Name="txtUsername" Width="250" Margin="0,2"/>
+                                        <Label Content="Password:" />
+                                        <PasswordBox Name="txtPassword" Width="250" Margin="0,2"/>
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Port (default 1433):" Grid.Column="0"/>
+                                        <TextBox Name="txtPort" Width="100" Margin="0,0,80,0" Grid.Column="1"/>
+                                    </Grid>
+                                    <Button Name="btnConnect" Content="Connect" Width="130" Height="40" Margin="0,20,0,0" Click="btnConnect_Click" />
+                                    <Label Name="lblConnectionSucessful" Content="Not Connected"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Column Visibility Settings -->
+                        <Border Grid.Column="1" BorderBrush="DarkGray" BorderThickness="1" CornerRadius="5" Padding="10" Margin="5">
+                            <StackPanel>
+                                <Label Content="Column Visibility Settings:" FontSize="16" Margin="0,0,0,10" FontWeight="Bold"/>
+                                <CheckBox Name="chkToolNumber" Content="Tool Number" Margin="0,5"/>
+                                <CheckBox Name="chkPotNum" Content="Pot Number" Margin="0,5"/>
+                                <CheckBox Name="chkToolLife" Content="Tool Life" Margin="0,5"/>
+                                <CheckBox Name="chkToolLifeRem" Content="Tool Life Remaining" Margin="0,5"/>
+                                <CheckBox Name="chkToolLengthOffset" Content="Length Offset" Margin="0,5"/>
+                                <CheckBox Name="chkIsAttached" Content="Tool Attached" Margin="0,5"/>
+                                <CheckBox Name="chkToolName" Content="Tool Name" Margin="0,5"/>
+                                <Button Name="btnUpdateColumnSettings" Content="Update Columns" 
+                ToolTip="Choose a SQL setting to enable." ToolTipService.ShowOnDisabled="True" 
+                Width="150" Height="40" Margin="0,20,0,20" Click="btnUpdateColumnSettings_Click" />
+
+                                <Label Content="Automatic Polling Frequency:" FontSize="16" Margin="0,0,0,10" FontWeight="Bold"/>
+
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,5">
+                                    <TextBox x:Name="txtPollingValue" Width="50" VerticalAlignment="Center" Margin="0,0,10,0" TextChanged="PollingValueTextBox_TextChanged"/>
+                                    <ComboBox x:Name="PollingUnitComboBox" VerticalAlignment="Center" Margin="0,0,10,0">
+                                        <ComboBoxItem Content="Seconds" IsSelected="True"/>
+                                        <ComboBoxItem Content="Minutes"/>
+                                        <ComboBoxItem Content="Hours"/>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <Button Name="btnStartPolling" Content="Start Polling" 
+                Width="150" Height="40" Margin="0,20,0,0" Click="btnStartPolling_Click"/>
+                                <Button Name="btnStopPolling" Content="Stop Polling" 
+                Width="150" Height="40" Margin="0,10,0,0" Click="btnStopPolling_Click" IsEnabled="False"/>
+                                <CheckBox x:Name="cbxAutoPoll" Content="Start polling on application start" Margin="0,20,0,0" FontSize="18" Checked="cbxAutoPoll_Checked" Unchecked="cbxAutoPoll_Unchecked"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
